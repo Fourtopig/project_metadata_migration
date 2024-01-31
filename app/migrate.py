@@ -1,5 +1,5 @@
 import streamlit as st
-from config_migrator import get_keboola_configs, migrate_configs
+from config_migrator import get_keboola_configs, migrate_configs, get_component_ids
 from storage_migrator import export_storage_metadata, migrate_buckets, migrate_tables, migrate_tables_native_types
 
 def main():
@@ -34,12 +34,13 @@ def main():
     st.header("Migrate Configurations")
     st.markdown("All components will be migrated unless you select 'Keep' or 'Skip' to only migrate or skip selected Component IDs.")
     processing_detail = st.selectbox("Processing Detail", ["", "Keep", "Skip"])
+    component_options = get_component_ids(source_project_host, {'X-StorageApi-Token':source_api_token})
     if processing_detail:
         if processing_detail == "Keep":
-            st.markdown("Enter comma separated list of Component IDs you want to keep (migrate), e.g. 'keboola.wr-snowflake-blob-storage', 'keboola.snowflake-transformation'")
+            st.markdown("Select Component IDs you want to keep (migrate)")
         elif processing_detail == "Skip":
-            st.markdown("Enter comma separated list of Component IDs you want to skip (not migrate), e.g. 'keboola.sandboxes', 'keboola.snowflake-transformation'")
-        component_ids = st.text_area("Component IDs")
+            st.markdown("Select Component IDs you want to skip (not migrate)")
+        component_ids = st.multiselect("Component IDs", component_options)
 
     if st.button("Migrate Configurations"):
         # Execute migrate configurations script
@@ -52,10 +53,10 @@ def main():
         skip = None
         keep = None
         if processing_detail == 'Skip':
-            skip = [component.strip("'") for component in component_ids.split(",")]
+            skip = component_ids
             st.write('Skipping following components:', skip)
         elif processing_detail == 'Keep':
-            keep = [component.strip("'") for component in component_ids.split(",")]
+            keep = component_ids
             st.write('Keeping following components:', keep)
         configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
         

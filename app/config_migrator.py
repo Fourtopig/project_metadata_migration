@@ -24,6 +24,18 @@ def get_keboola_configs(BASE, HEAD, skip=None, keep=None):
     st.write(f'Configurations extracted... ')
     return configs_src
 
+def get_component_ids(BASE, HEAD):
+    components_src = requests.get(f'{BASE}v2/storage/components', headers=HEAD)
+    component_ids = []
+
+    for component in components_src.json():
+        component_id = component['id']
+        component_ids.append(component_id)
+    
+    component_ids = list(set(component_ids))
+        
+    return component_ids
+
 def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False):
     fails = []
     st.write(f'Proceeding to migrate {len(configs_src)} configurations...')

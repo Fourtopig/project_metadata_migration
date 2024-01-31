@@ -15,17 +15,17 @@ source venv/bin/activate
 
 3. Upgrade pip (optional but recommended)
 ```bash
-pip install --upgrade pip
+pip3 install --upgrade pip
 ```
 
 4. Install the required packages from requirements.txt
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 5. Run the app
 ```bash
-streamlit app/migrate.py
+streamlit run app/migrate.py
 ```
 
 
