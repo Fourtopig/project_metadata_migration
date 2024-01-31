@@ -1,25 +1,35 @@
 import requests
 import streamlit as st
 
-def get_keboola_configs(BASE, HEAD, skip=None, keep=None):
+def get_keboola_configs(BASE, HEAD, skip=None, keep=None, selected_configs=None):
     st.write('Exporting configurations...')
-    components_src = requests.get(f'{BASE}v2/storage/components', headers=HEAD)
     configs_src = []
+    
+    if selected_configs:
+        for config in selected_configs:
+            component_id = config[0]
+            configuration_id = config[2]
+            configs = requests.get(f'{BASE}v2/storage/components/{component_id}/configs/{configuration_id}', headers=HEAD)
+            config_out = configs.json()
+            config_out['component_id'] = component_id
+            configs_src.append(config_out)
 
-    for component in components_src.json():
-        component_id = component['id']
-        if skip and component_id in skip:
-            st.write(f'Component {component_id} is skipped...')
-            continue
+    else:
+        components_src = requests.get(f'{BASE}v2/storage/components', headers=HEAD)
+        for component in components_src.json():
+            component_id = component['id']
+            if skip and component_id in skip:
+                st.write(f'Component {component_id} is skipped...')
+                continue
+                
+            if keep and component_id not in keep:
+                st.write(f'Component {component_id} is skipped...')
+                continue
             
-        if keep and component_id not in keep:
-            st.write(f'Component {component_id} is skipped...')
-            continue
-
-        configs = requests.get(f'{BASE}v2/storage/components/{component_id}/configs', headers=HEAD)
-        for config in configs.json():
-            config['component_id'] = component_id
-            configs_src.append(config)
+            configs = requests.get(f'{BASE}v2/storage/components/{component_id}/configs', headers=HEAD)
+            for config in configs.json():
+                config['component_id'] = component_id
+                configs_src.append(config)
 
     st.write(f'Configurations extracted... ')
     return configs_src
@@ -35,6 +45,31 @@ def get_component_ids(BASE, HEAD):
     component_ids = list(set(component_ids))
         
     return component_ids
+
+def get_component_configurations(BASE, HEAD, COMPONENT_IDS=None, MODE=None):
+    configs_src = []
+    if COMPONENT_IDS and len(COMPONENT_IDS)>0:
+        if MODE == 'keep':
+            for component_id in COMPONENT_IDS:
+                configs = requests.get(f'{BASE}v2/storage/components/{component_id}/configs', headers=HEAD)
+                for config in configs.json():
+                    configs_src.append([component_id, config['name'], config['id']])
+        elif MODE == 'skip':
+            components_src = requests.get(f'{BASE}v2/storage/components', headers=HEAD)
+            for component in components_src.json():
+                if component['id'] not in COMPONENT_IDS:
+                    component_id = component['id']
+                    configs = requests.get(f'{BASE}v2/storage/components/{component_id}/configs', headers=HEAD)
+                    for config in configs.json():
+                        configs_src.append([component_id, config['name'], config['id']])
+    else:
+        components_src = requests.get(f'{BASE}v2/storage/components', headers=HEAD)
+        for component in components_src.json():
+            component_id = component['id'] 
+            configs = requests.get(f'{BASE}v2/storage/components/{component_id}/configs', headers=HEAD)
+            for config in configs.json():
+                configs_src.append([component_id, config['name'], config['id']])
+    return configs_src
 
 def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False):
     fails = []
