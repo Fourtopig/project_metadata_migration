@@ -15,7 +15,7 @@ def main():
     if source_project_host == "Others (Enter custom hostname)":
         source_project_host = st.sidebar.text_input("Enter Custom Source Hostname")
 
-    same_as_source = st.sidebar.checkbox("Same as Source", value=False)
+    same_as_source = st.sidebar.checkbox("Destination host same as Source", value=False)
     if same_as_source:
         destination_project_host = source_project_host
     else:
@@ -27,8 +27,8 @@ def main():
         if destination_project_host == "Others (Enter custom hostname)":
             destination_project_host = st.sidebar.text_input("Enter Custom Destination Hostname")
 
-    source_api_token = st.sidebar.text_input("Source Project Storage API Token")
-    destination_api_token = st.sidebar.text_input("Destination Project Storage API Token")
+    source_api_token = st.sidebar.text_input("Source Project Storage API Token", type="password")
+    destination_api_token = st.sidebar.text_input("Destination Project Storage API Token", type="password")
 
     # MAIN CODE 
     st.header("Migrate Configurations")
