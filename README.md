@@ -1,7 +1,9 @@
 # Keboola Project Migration
-The app migrates Keboola project's metadata from source to a destination project.
+The app migrates Keboola project's metadata (Component - Extractors, Writers, Apps, Transformations, Variables, Shared codes and others configurations as well as Storage object definitions) from source to a destination project.
+This app doesn't migrate the data, only the configurations. 
 
-To execute the app it's recommended to fetch the repository to local machine and run it in virtual environment:
+
+To execute the app it's recommended to fetch the repository to local machine and run it in virtual environment. Clone it, navigate to the cloned folder and execute the following.
 
 1. Create a virtual environment named 'venv'
 ```bash
