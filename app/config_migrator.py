@@ -1,5 +1,6 @@
 import requests
 import streamlit as st
+import datetime
 
 def get_keboola_configs(BASE, HEAD, skip=None, keep=None, selected_configs=None):
     st.write('Exporting configurations...')
@@ -23,7 +24,7 @@ def get_keboola_configs(BASE, HEAD, skip=None, keep=None, selected_configs=None)
                 continue
                 
             if keep and component_id not in keep:
-                st.write(f'Component {component_id} is skipped...')
+                # st.write(f'Component {component_id} is skipped...')
                 continue
             
             configs = requests.get(f'{BASE}v2/storage/components/{component_id}/configs', headers=HEAD)
@@ -73,7 +74,9 @@ def get_component_configurations(BASE, HEAD, COMPONENT_IDS=None, MODE=None):
 
 def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False):
     fails = []
+    log_messages = [] 
     st.write(f'Proceeding to migrate {len(configs_src)} configurations...')
+    
     for config in configs_src:
         try:
             configurationId = config['id']
@@ -99,38 +102,43 @@ def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_D
                         "metadata[0][key]": "KBC.configuration.folderName",
                         "metadata[0][value]": snowflake_metadata.json()[0]['value']
                     }
+
+            metadataFolderPayloadPython = False
+            if componentId == 'keboola.python-transformation-v2':
+                python_metadata = requests.get(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/keboola.python-transformation-v2/configs/{configurationId}/metadata',
+                                                  headers=HEAD)
+                if python_metadata.json():
+                    metadataFolderPayloadPython = {
+                        "metadata[0][key]": "KBC.configuration.folderName",
+                        "metadata[0][value]": python_metadata.json()[0]['value']
+                    }
                 
             if not DEBUG:
                 config_dest = requests.post(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/{componentId}/configs',
                                             headers=HEAD_DEST,
                                             json=values)
+                response = requests.put(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/{componentId}/configs/{configurationId}',
+                                                  headers=HEAD_DEST,
+                                                  json=values)
 
                 if metadataFolderPayload:
                     requests.post(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/keboola.snowflake-transformation/configs/{configurationId}/metadata',
                                   headers=HEAD_FORM_DEST,
                                   data=metadataFolderPayload)
 
-            for row in config['rows']:
-                rowId = row['id']
-                rowName = row['name']
-                rowConfig = row['configuration']
-                rowDescription = row['description']
-                values_row = {
-                    'rowId': rowId,
-                    'name': rowName,
-                    'configuration': rowConfig
-                }
-                if rowDescription:
-                    values_row['description'] = rowDescription
-                
-                if not DEBUG:
-                    config_dest_row = requests.post(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/{componentId}/configs/{config_dest.json()["id"]}/rows',
-                                                    headers=HEAD_DEST,
-                                                    json=values_row)
+                if metadataFolderPayloadPython:
+                    requests.post(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/keboola.python-transformation-v2/configs/{configurationId}/metadata',
+                                  headers=HEAD_FORM_DEST,
+                                  data=metadataFolderPayloadPython)
 
-            st.write('Migrated:', config['component_id'], config['name'])
+            current_time = datetime.datetime.now().replace(microsecond=0)
+            log_messages.append(F"Migrated: {config['component_id']} {config['name']} at {current_time}")
         except Exception as e:
-            print('FAILED:', config['component_id'], config['name'], str(e))
+            log_messages.append(f'FAILED: {config["component_id"]} {config["name"]} {str(e)}')
             fails.append(config)
 
+    for message in log_messages:
+        st.write(message)  
+
     return fails
+

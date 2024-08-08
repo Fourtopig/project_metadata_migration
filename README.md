@@ -7,22 +7,22 @@ To execute the app it's recommended to fetch the repository to local machine and
 
 1. Create a virtual environment named 'venv'
 ```bash
-python3 -m venv venv
+python -m venv venv
 ```
 
 2. Activate the virtual environment
 ```bash
-source venv/bin/activate
+.\venv\Scripts\activate
 ```
 
 3. Upgrade pip (optional but recommended)
 ```bash
-pip3 install --upgrade pip
+python -m pip install --upgrade pip
 ```
 
 4. Install the required packages from requirements.txt
 ```bash
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 5. Run the app
