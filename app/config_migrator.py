@@ -49,7 +49,7 @@ def get_component_ids(BASE, HEAD):
 
 def get_component_configurations(BASE, HEAD, COMPONENT_IDS=None, MODE=None):
     configs_src = []
-    if COMPONENT_IDS and len(COMPONENT_IDS)>0:
+    if COMPONENT_IDS and len(COMPONENT_IDS) > 0:
         if MODE == 'keep':
             for component_id in COMPONENT_IDS:
                 configs = requests.get(f'{BASE}v2/storage/components/{component_id}/configs', headers=HEAD)

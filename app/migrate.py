@@ -4,7 +4,6 @@ import json
 import os
 from requests.exceptions import ConnectionError, Timeout
 from config_migrator import get_keboola_configs, migrate_configs, get_component_ids, get_component_configurations
-from storage_migrator import export_storage_metadata, migrate_buckets, migrate_tables, migrate_tables_native_types
 
 def main():
     st.title("Project Metadata Migration")
@@ -68,9 +67,9 @@ def main():
         component_ids = []
 
         if processing_detail:
-            ingnoreflow = st.sidebar.checkbox("Include orchestrator and scheduler", value=False)
+            ignoreflow = st.sidebar.checkbox("Include orchestrator and scheduler", value=False)
             # Remove orchestrators and schedulers from components
-            if ingnoreflow:
+            if ignoreflow:
                 component_options = available_component_options
             else:
                 component_to_remove = ["keboola.scheduler", "keboola.orchestrator"]
@@ -107,11 +106,8 @@ def main():
                configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, None, 'all')
 
             # Remove orchestrators and schedulers from configurations
-            if ingnoreflow:
-                selected_configuration_options = configuration_options
-            else:
-                component_to_remove = ["keboola.scheduler", "keboola.orchestrator"]
-                selected_configuration_options = [item for item in configuration_options if item[0] not in component_to_remove]
+            components_to_ignore= [] if ignoreflow else ["keboola.scheduler", "keboola.orchestrator"]
+            selected_configuration_options = [item for item in configuration_options if item[0] not in components_to_ignore]
 
             # Selects configurations according to the user's choice
             if selected_configuration_options and processing_detail == "Keep":
