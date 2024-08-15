@@ -131,6 +131,32 @@ def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, D
 
         current_time = datetime.datetime.now().replace(microsecond=0)
         log_messages.append(F"Migrated: {config['component_id']} {config['name']} at {current_time}")
+
+        for row in config['rows']:
+                rowId = row['id']
+                rowName = row['name']
+                rowConfig = row['configuration']
+                rowDescription = row['description']
+                values_row = {
+                    'rowId': rowId,
+                    'name': rowName,
+                    'configuration': rowConfig
+                }
+                if rowDescription:
+                    values_row['description'] = rowDescription
+                
+                if not DEBUG:
+                    config_dest_row = requests.post(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/{componentId}/configs/{configurationId}/rows/{rowId}',
+                                                    headers=HEAD_DEST,
+                                                    json=values_row)
+                    config_dest_row_update = requests.put(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/{componentId}/configs/{configurationId}/rows/{rowId}',
+                                                    headers=HEAD_DEST,
+                                                    json=values_row)
+                #log_messages.append(config_dest_row_update.json())
+
+
+
+
     except Exception as e:
         log_messages.append(f'FAILED: {config["component_id"]} {config["name"]} {str(e)}')
         return (False, log_messages)
@@ -161,4 +187,3 @@ def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_D
         st.write(message)
 
     return fails
-

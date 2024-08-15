@@ -190,6 +190,7 @@ def main():
 
             # Final status update after all migrations are complete
             status_text.text("Migration completed!")
+        if fails == []:
             st.balloons()
     else:
         st.markdown("First, select the source project from which you want to transfer the configuration. Then, choose the projects to which you want to migrate it...")
