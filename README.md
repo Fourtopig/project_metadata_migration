@@ -29,8 +29,7 @@ Example JSON:
 
 ```
 
-
-
+## Run app
 To execute the app it's recommended to fetch the repository to local machine and run it in virtual environment. Clone it, navigate to the cloned folder and execute the following.
 
 1. Create a virtual environment named 'venv'
@@ -58,8 +57,4 @@ pip install -r requirements.txt
 streamlit run app/migrate.py
 ```
 
-
-
-## Configration Migration
-Migrates all components including all Extractors, Writers, Apps, Flows, Variables, Shared codes, Transformations. It allows user to select specific components that should be migrated or skipped.
 
