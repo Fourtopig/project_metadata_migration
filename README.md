@@ -1,6 +1,34 @@
 # Keboola Project Migration
-The app migrates Keboola project's metadata (Component - Extractors, Writers, Apps, Transformations, Variables, Shared codes and others configurations as well as Storage object definitions) from source to a destination project.
+The app migrates Keboola project's metadata (Component - Extractors, Writers, Apps, Transformations, Variables, Shared codes and others configurations) from source to a destination project.
 This app doesn't migrate the data, only the configurations. 
+
+# Configuration files
+In the app folder, you need to add two configuration JSON files (config_destination.json, config_source.json) to load tokens for the source and target projects (for security reasons, these files are not pushed to GIT).
+
+Example JSON:
+```bash
+{
+  "projects": [
+    {
+      "name": "TEST 2",
+      "url": "https://connection.keboola.com/",
+      "token": "TOKEN"
+    },
+    {
+      "name": "TEST 3",
+      "url": "https://connection.keboola.com/",
+      "token": "TOKEN"
+    },
+    {
+      "name": "TEST 1",
+      "url": "https://connection.keboola.com/",
+      "token": "TOKEN"
+    }
+  ]
+}
+
+```
+
 
 
 To execute the app it's recommended to fetch the repository to local machine and run it in virtual environment. Clone it, navigate to the cloned folder and execute the following.
@@ -35,5 +63,3 @@ streamlit run app/migrate.py
 ## Configration Migration
 Migrates all components including all Extractors, Writers, Apps, Flows, Variables, Shared codes, Transformations. It allows user to select specific components that should be migrated or skipped.
 
-## Storage Migration
-Migrates all storage buckets and tables (only definitions). It doesn't migrate data, only creates empty tables in the destination project. It supports Native Types if needed. 

@@ -112,15 +112,15 @@ def main():
 
             # Selects configurations according to the user's choice
             if selected_configuration_options and processing_detail == "Keep":
-                st.write("Select a Source Choice to choose component configurations related to the selected source.Or My choice for a free selection of configurations.")
-                select_options = st.selectbox("Select option:", ["Source Choice", "My Choice"])
+                st.write("Select a Folder Choice to choose component configurations related to the selected folder in Keboola.Or My choice for a free selection of configurations.")
+                select_options = st.selectbox("Select option:", ["Folder Choice", "My Choice"])
                 if select_options == "My Choice":
                     st.write("Select Component IDs, keep empty for all.")
                     configuration_ids = st.multiselect("Configuration IDs", selected_configuration_options)
  
-                elif select_options == "Source Choice":
+                elif select_options == "Folder Choice":
                     options = list({re.search(r'\[(.*?)\]', item[1]).group(1) for item in selected_configuration_options if "[" in item[1] and "]" in item[1]})
-                    selected_options = st.multiselect('Sources:', options)
+                    selected_options = st.multiselect('Folder:', options)
  
                     filtered_data = [item for item in selected_configuration_options if any(selected in item[1] for selected in selected_options)]
                     st.write("Select Component IDs, keep empty for all.")
@@ -190,8 +190,8 @@ def main():
 
             # Final status update after all migrations are complete
             status_text.text("Migration completed!")
-        if fails == []:
-            st.balloons()
+            if fails == []:
+                st.balloons()
     else:
         st.markdown("First, select the source project from which you want to transfer the configuration. Then, choose the projects to which you want to migrate it...")
 
