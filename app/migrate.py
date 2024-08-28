@@ -112,15 +112,15 @@ def main():
 
             # Selects configurations according to the user's choice
             if selected_configuration_options and processing_detail == "Keep":
-                st.write("Select a Folder Choice to choose component configurations related to the selected folder in Keboola.Or My choice for a free selection of configurations.")
-                select_options = st.selectbox("Select option:", ["Folder Choice", "My Choice"])
-                if select_options == "My Choice":
+                st.write("Select a Migrate whole [Folder] or [Type] to choose component configurations related to the selected folder in Keboola. Or Migrate specific components for a free selection of configurations.")
+                select_options = st.selectbox("Select option:", ["Migrate whole [Folder] or [Type]", "Migrate specific components"])
+                if select_options == "Migrate specific components":
                     st.write("Select Component IDs, keep empty for all.")
                     configuration_ids = st.multiselect("Configuration IDs", selected_configuration_options)
  
-                elif select_options == "Folder Choice":
+                elif select_options == "Migrate whole [Folder] or [Type]":
                     options = list({re.search(r'\[(.*?)\]', item[1]).group(1) for item in selected_configuration_options if "[" in item[1] and "]" in item[1]})
-                    selected_options = st.multiselect('Folder:', options)
+                    selected_options = st.multiselect('[Folder] or [Type]:', options)
  
                     filtered_data = [item for item in selected_configuration_options if any(selected in item[1] for selected in selected_options)]
                     st.write("Select Component IDs, keep empty for all.")

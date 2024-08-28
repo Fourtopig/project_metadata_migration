@@ -29,7 +29,7 @@ Example JSON:
 
 ```
 
-## Run app
+# Run app
 To execute the app it's recommended to fetch the repository to local machine and run it in virtual environment. Clone it, navigate to the cloned folder and execute the following.
 
 1. Create a virtual environment named 'venv'
