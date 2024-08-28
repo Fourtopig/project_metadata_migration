@@ -139,59 +139,102 @@ def main():
                 else:
                     configuration_ids = selected_configuration_options
 
-        if st.button("Migrate Configurations"):
-            st.empty() 
-            total_projects = len(destination_selected_project_details)
-            st.subheader("Migration Progress")
-            percent_complete_text = st.empty() # Placeholder for dynamic status text
-            percent_complete_text.text("0 %")
+        # Initialize session state for the first button
+        if 'config_loaded' not in st.session_state:
+            st.session_state['config_loaded'] = False
 
-            progress_bar = st.progress(0)
-            status_text = st.empty()  # Placeholder for dynamic status text
-            st.empty() 
+        # First button
+        if st.button("Load Configurations"):
+            st.empty()
+    
+            HEAD = {'X-StorageApi-Token': source_api_token}
+            HEAD_FORM = {'X-StorageApi-Token': source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
 
-            for i, dest_project in enumerate(destination_selected_project_details):
-                destination_api_token = dest_project['token']
-                destination_project_name = dest_project['name']
+            if only_selected_configs and len(configuration_ids) > 0:
+                configs = get_keboola_configs(source_project_host, HEAD, skip, keep, configuration_ids)
+            else:
+                configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
 
-                # Update status text to show current project being migrated
-                status_text.text(f"Migrating project {i + 1} of {total_projects}: {destination_project_name}")
+            st.write("Configurations to migrate:")
+            # Display the loaded configurations
+            for config in configs:
+                component_id = config.get("component_id")
+                name = config.get("name")
+                config_id = config.get("id")
+    
+                st.write(f"**{component_id}** name **{name}** and ID **{config_id}**")
 
-                # Execute migrate configurations script for all selected projects
-                HEAD = {'X-StorageApi-Token':source_api_token}
-                HEAD_FORM = {'X-StorageApi-Token':source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
-                HEAD_DEST = {'X-StorageApi-Token':destination_api_token}
-                HEAD_FORM_DEST = {'X-StorageApi-Token':destination_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
-                BRANCH_DEST = 'default'
+            st.write("")
+            st.write("Clicking on button **Migrate Configurations** will migrate the following configurations.Click on **Dismiss Configurations** to clear the configuration selection")
+            # Set the state after configurations are loaded
+            st.session_state['config_loaded'] = True
+            
 
-                st.header(f"The configuration migration to the {destination_project_name} project is in progress")
+            # Second button, which appears only after the configurations are loaded
+        if st.session_state['config_loaded']:
+            col1, col2, col3, col4  = st.columns([1, 1, 1, 1])
+            st.empty()
+            with col2:
+                migrate_clicked  = st.button("Migrate Configurations")
+                    
+            with col3:
+                if st.button("Dismiss Configurations"):
+                    # Reset the state to hide the migrate button and clear selections
+                    st.session_state['config_loaded'] = False
+                    st.experimental_rerun()
 
-                try:
-                    if only_selected_configs and len(configuration_ids) > 0:
-                        configs = get_keboola_configs(source_project_host, HEAD, skip, keep, configuration_ids)
-                    else:
-                        configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
+            if migrate_clicked:
+                    st.empty() 
+                    total_projects = len(destination_selected_project_details)
+                    st.subheader("Migration Progress")
+                    percent_complete_text = st.empty() # Placeholder for dynamic status text
+                    percent_complete_text.text("0 %")
 
-                    fails = migrate_configs(source_project_host, HEAD, configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False)
-                    st.write(f"Migration to {destination_project_name} completed. Failures:", fails)
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()  # Placeholder for dynamic status text
+                    st.empty() 
 
-                except (ConnectionError, Timeout) as conn_err:
-                    st.warning(f"Connection error occurred while migrating to {destination_project_name}. Please check your internet connection and try again.")
-                    st.error(f"Error details: {conn_err}")
-                except Exception as e:
-                    st.warning(f"Something went wrong with the migration to {destination_project_name}. Please try again later.")
-                    st.error(f"Error details: {e}")
+                    for i, dest_project in enumerate(destination_selected_project_details):
+                        destination_api_token = dest_project['token']
+                        destination_project_name = dest_project['name']
 
-                # Update progress bar and percent text after completing each project
-                percent_complete = int(((i + 1) / total_projects) * 100)
-                percent_complete_text.text(f"{percent_complete} %")
-                progress_bar.progress((i + 1) / total_projects)
+                        # Update status text to show current project being migrated
+                        status_text.text(f"Migrating project {i + 1} of {total_projects}: {destination_project_name}")
 
+                        # Execute migrate configurations script for all selected projects
+                        HEAD = {'X-StorageApi-Token':source_api_token}
+                        HEAD_FORM = {'X-StorageApi-Token':source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
+                        HEAD_DEST = {'X-StorageApi-Token':destination_api_token}
+                        HEAD_FORM_DEST = {'X-StorageApi-Token':destination_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
+                        BRANCH_DEST = 'default'
 
-            # Final status update after all migrations are complete
-            status_text.text("Migration completed!")
-            if fails == []:
-                st.balloons()
+                        st.header(f"The configuration migration to the {destination_project_name} project is in progress")
+
+                        try:
+                            if only_selected_configs and len(configuration_ids) > 0:
+                                configs = get_keboola_configs(source_project_host, HEAD, skip, keep, configuration_ids)
+                            else:
+                                configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
+
+                            fails = migrate_configs(source_project_host, HEAD, configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False)
+                            st.write(f"Migration to {destination_project_name} completed. Failures:", fails)
+
+                        except (ConnectionError, Timeout) as conn_err:
+                            st.warning(f"Connection error occurred while migrating to {destination_project_name}. Please check your internet connection and try again.")
+                            st.error(f"Error details: {conn_err}")
+                        except Exception as e:
+                            st.warning(f"Something went wrong with the migration to {destination_project_name}. Please try again later.")
+                            st.error(f"Error details: {e}")
+
+                        # Update progress bar and percent text after completing each project
+                        percent_complete = int(((i + 1) / total_projects) * 100)
+                        percent_complete_text.text(f"{percent_complete} %")
+                        progress_bar.progress((i + 1) / total_projects)
+
+                    # Final status update after all migrations are complete
+                    status_text.text("Migration completed!")
+                    if fails == []:
+                        st.balloons()
     else:
         st.markdown("First, select the source project from which you want to transfer the configuration. Then, choose the projects to which you want to migrate it...")
 

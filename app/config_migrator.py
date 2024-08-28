@@ -34,7 +34,7 @@ def get_keboola_configs(BASE, HEAD, skip=None, keep=None, selected_configs=None)
                 config['component_id'] = component_id
                 configs_src.append(config)
 
-    st.write(f'Configurations extracted... ')
+    
     return configs_src
 
 def get_component_ids(BASE, HEAD):
