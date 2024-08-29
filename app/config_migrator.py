@@ -130,7 +130,7 @@ def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, D
                               data=metadataFolderPayloadPython)
 
         current_time = datetime.datetime.now().replace(microsecond=0)
-        log_messages.append(F"Migrated: {config['component_id']} {config['name']} at {current_time}")
+        log_messages.append(F"**Migrated**: {config['component_id']} **{config['name']}** at {current_time}")
 
         for row in config['rows']:
                 rowId = row['id']
