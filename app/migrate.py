@@ -5,7 +5,6 @@ import os
 from requests.exceptions import ConnectionError, Timeout
 from config_migrator import get_keboola_configs, migrate_configs, get_component_ids, get_component_configurations
 
-
 def main():
     st.title("Project Metadata Migration")
 
@@ -17,46 +16,53 @@ def main():
     source_config_path = 'config_source.json'
     destination_config_path = 'config_destination.json'
 
-    if os.path.exists(source_config_path):
-        with open(source_config_path, 'r') as file:
-            source_config = json.load(file)
+    # Load source config
+    if 'source_config' not in st.session_state:
+        if os.path.exists(source_config_path):
+            with open(source_config_path, 'r') as file:
+                st.session_state.source_config = json.load(file)
+        else:
+            st.write(f"Source config file not found: {source_config_path}")
+            return
+    source_config = st.session_state.source_config
 
-        # General settings in the sidebar
-        st.sidebar.title("General Settings")
-
-        # Get the list of project names from the source config
-        all_source_project_names = [project['name'] for project in source_config['projects']]
-
-        # User selection of source project in the sidebar
-        source_selected_project = st.sidebar.selectbox("Select Source Project", all_source_project_names)
-        source_selected_project_details = [project for project in source_config['projects'] if project['name'] == source_selected_project]
-
-        source_api_token = source_selected_project_details[0]['token']
-        source_project_host = source_selected_project_details[0]['url']
-
+    # Load destination config
+    if 'destination_config' not in st.session_state:
         if os.path.exists(destination_config_path):
             with open(destination_config_path, 'r') as file:
-                destination_config = json.load(file)
-
-            # Get the list of project names from the destination config
-            all_destination_project_names = [project['name'] for project in destination_config['projects']]
-
-            # User selection of destination projects in the sidebar
-            destination_selected_projects = st.sidebar.multiselect("Select Destination Projects", all_destination_project_names)
-            destination_selected_project_details = [project for project in destination_config['projects'] if project['name'] in destination_selected_projects]
-            dest_project_names = [project['name'] for project in destination_selected_project_details]
-            dest_project_names_str = ", ".join([f"**{name}**" for name in dest_project_names])
-
-            if source_selected_project_details:
-                st.markdown(f"The source project from which the configuration will be migrated: **{source_selected_project_details[0]['name']}**")
-
-            if dest_project_names_str:
-                st.markdown(f"The selected configurations will be migrated to: {dest_project_names_str}")
-
+                st.session_state.destination_config = json.load(file)
         else:
             st.write(f"Destination config file not found: {destination_config_path}")
-    else:
-        st.write(f"Source config file not found: {source_config_path}")
+            return
+    destination_config = st.session_state.destination_config
+
+    # General settings in the sidebar
+    st.sidebar.title("General Settings")
+
+    # Get the list of project names from the source config
+    all_source_project_names = [project['name'] for project in source_config['projects']]
+
+    # User selection of source project in the sidebar
+    source_selected_project = st.sidebar.selectbox("Select Source Project", all_source_project_names)
+    source_selected_project_details = [project for project in source_config['projects'] if project['name'] == source_selected_project]
+
+    source_api_token = source_selected_project_details[0]['token']
+    source_project_host = source_selected_project_details[0]['url']
+
+    # Get the list of project names from the destination config
+    all_destination_project_names = [project['name'] for project in destination_config['projects']]
+
+    # User selection of destination projects in the sidebar
+    destination_selected_projects = st.sidebar.multiselect("Select Destination Projects", all_destination_project_names)
+    destination_selected_project_details = [project for project in destination_config['projects'] if project['name'] in destination_selected_projects]
+    dest_project_names = [project['name'] for project in destination_selected_project_details]
+    dest_project_names_str = ", ".join([f"**{name}**" for name in dest_project_names])
+
+    if source_selected_project_details:
+        st.markdown(f"The source project from which the configuration will be migrated: **{source_selected_project_details[0]['name']}**")
+
+    if dest_project_names_str:
+        st.markdown(f"The selected configurations will be migrated to: {dest_project_names_str}")
 
     if source_project_host and source_api_token and destination_selected_project_details:
         # Migrate Configurations in the main area
@@ -64,7 +70,13 @@ def main():
         st.markdown("All components will be migrated unless you select 'Keep' or 'Skip' to only migrate or skip selected Component IDs. Select an option in the process settings from the left panel.")
         st.sidebar.title("Process Settings")
         processing_detail = st.sidebar.selectbox("Processing Detail", ["", "Keep", "Skip"])
-        available_component_options = get_component_ids(source_project_host, {'X-StorageApi-Token':source_api_token})
+        
+        # Load available component options only once
+        if 'available_component_options' not in st.session_state:
+            with st.spinner("Fetching available components..."):
+                st.session_state.available_component_options = get_component_ids(source_project_host, {'X-StorageApi-Token':source_api_token})
+        available_component_options = st.session_state.available_component_options
+
         component_ids = []
 
         if processing_detail:
@@ -96,18 +108,19 @@ def main():
 
         if only_selected_configs:
             configuration_options = None
-            if skip:
-                st.write('Fetching available configurations besides the components you wanted to skip...')
-                configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, component_ids, 'skip')
-            elif keep:
-                st.write('Fetching available configurations for components you selected...')
-                configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, component_ids, 'keep')
-            else:
-               st.write('Fetching available configurations for all components...')
-               configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, None, 'all')
+            with st.spinner("Fetching configurations..."):
+                if skip:
+                    st.write('Fetching available configurations besides the components you wanted to skip...')
+                    configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, component_ids, 'skip')
+                elif keep:
+                    st.write('Fetching available configurations for components you selected...')
+                    configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, component_ids, 'keep')
+                else:
+                    st.write('Fetching available configurations for all components...')
+                    configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, None, 'all')
 
             # Remove orchestrators and schedulers from configurations
-            components_to_ignore= [] if ignoreflow else ["keboola.scheduler", "keboola.orchestrator"]
+            components_to_ignore = [] if ignoreflow else ["keboola.scheduler", "keboola.orchestrator"]
             selected_configuration_options = [item for item in configuration_options if item[0] not in components_to_ignore]
 
             # Selects configurations according to the user's choice
@@ -139,35 +152,53 @@ def main():
                 else:
                     configuration_ids = selected_configuration_options
 
+            # Adds variables related to the selected transformation
+            includevariable = st.sidebar.checkbox("Include migration of variables related to selected transformations (Python and Snowflake)", value=True)
+            if includevariable:
+                all_variables_ids = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, ["keboola.variables"], 'keep')
+                variables_ids = []
+
+                for config in configuration_ids:
+                    config_id = config[2] 
+                    match_found = False
+
+                    for variable in all_variables_ids:
+                        variable_definition = variable[1]  
+
+                        if variable_definition.endswith(config_id):
+                            match_found = True
+                            variables_ids.append(variable) 
+
+                configuration_ids.extend(variables_ids)
+
         # Initialize session state for the first button
         if 'config_loaded' not in st.session_state:
             st.session_state['config_loaded'] = False
 
         # First button
         if st.button("Load Configurations"):
-            st.empty()
-    
-            HEAD = {'X-StorageApi-Token': source_api_token}
-            HEAD_FORM = {'X-StorageApi-Token': source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
+            with st.spinner("Loading configurations..."):
+                HEAD = {'X-StorageApi-Token': source_api_token}
+                HEAD_FORM = {'X-StorageApi-Token': source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
 
-            if only_selected_configs and len(configuration_ids) > 0:
-                configs = get_keboola_configs(source_project_host, HEAD, skip, keep, configuration_ids)
-            else:
-                configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
+                if only_selected_configs and len(configuration_ids) > 0:
+                    configs = get_keboola_configs(source_project_host, HEAD, skip, keep, configuration_ids)
+                else:
+                    configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
 
-            st.write("Configurations to migrate:")
-            # Display the loaded configurations
-            for config in configs:
-                component_id = config.get("component_id")
-                name = config.get("name")
-                config_id = config.get("id")
-    
-                st.write(f"**{component_id}** name **{name}** and ID **{config_id}**")
+                st.write("Configurations to migrate:")
+                # Display the loaded configurations
+                for config in configs:
+                    component_id = config.get("component_id")
+                    name = config.get("name")
+                    config_id = config.get("id")
+        
+                    st.write(f"**{component_id}** name **{name}** and ID **{config_id}**")
 
-            st.write("")
-            st.write("Clicking on button **Migrate Configurations** will migrate the following configurations.Click on **Dismiss Configurations** to clear the configuration selection")
-            # Set the state after configurations are loaded
-            st.session_state['config_loaded'] = True
+                st.write("")
+                st.write("Clicking on button **Migrate Configurations** will migrate the following configurations. Click on **Dismiss Configurations** to clear the configuration selection")
+                # Set the state after configurations are loaded
+                st.session_state['config_loaded'] = True
             
 
         # Second button, which appears only after the configurations are loaded
@@ -191,10 +222,8 @@ def main():
                 # If "Migrate Configurations" is clicked, update state and rerun
                 if migrate_clicked:
                     st.session_state['migrate_clicked'] = True
-                    st.experimental_rerun()
     
             if st.session_state['migrate_clicked']:
-                st.empty() 
                 total_projects = len(destination_selected_project_details)
                 st.subheader("Migration Progress")
                 percent_complete_text = st.empty()  # Placeholder for dynamic status text
@@ -202,7 +231,6 @@ def main():
 
                 progress_bar = st.progress(0)
                 status_text = st.empty()  # Placeholder for dynamic status text
-                st.empty()
 
                 for i, dest_project in enumerate(destination_selected_project_details):
                     destination_api_token = dest_project['token']
