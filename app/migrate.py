@@ -8,6 +8,8 @@ from config_migrator import get_keboola_configs, migrate_configs, get_component_
 def main():
     st.title("Project Metadata Migration")
 
+    include_shared_code = False
+
     # Set the working directory to the directory where the script is located.
     script_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_dir)
@@ -65,6 +67,8 @@ def main():
         st.markdown(f"The selected configurations will be migrated to: {dest_project_names_str}")
 
     if source_project_host and source_api_token and destination_selected_project_details:
+        HEAD = {'X-StorageApi-Token': source_api_token}
+        HEAD_FORM = {'X-StorageApi-Token': source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
         # Migrate Configurations in the main area
         st.subheader("Migrate Configurations")
         st.markdown("All components will be migrated unless you select 'Keep' or 'Skip' to only migrate or skip selected Component IDs. Select an option in the process settings from the left panel.")
@@ -78,6 +82,8 @@ def main():
         available_component_options = st.session_state.available_component_options
 
         component_ids = []
+        shared_code_ids_snowflake = []
+        shared_code_ids_python = []
 
         if processing_detail:
             ignoreflow = st.sidebar.checkbox("Include orchestrator and scheduler", value=False)
@@ -153,8 +159,8 @@ def main():
                     configuration_ids = selected_configuration_options
 
             # Adds variables related to the selected transformation
-            includevariable = st.sidebar.checkbox("Include migration of variables related to selected transformations (Python and Snowflake)", value=True)
-            if includevariable:
+            include_variable = st.sidebar.checkbox("Include migration of variables related to selected transformations (Python and Snowflake)", value=True)
+            if include_variable:
                 all_variables_ids = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, ["keboola.variables"], 'keep')
                 variables_ids = []
 
@@ -171,6 +177,12 @@ def main():
 
                 configuration_ids.extend(variables_ids)
 
+            # Adds variables related to the selected transformation
+            include_shared_code = st.sidebar.checkbox("Include shared codes related to selected transformations (Python and Snowflake)", value=True)
+            if include_shared_code:
+                shared_codes = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, ["keboola.shared-code"], 'keep')
+                shared_code_configs = get_keboola_configs(source_project_host, HEAD, skip, keep, shared_codes)
+
         # Initialize session state for the first button
         if 'config_loaded' not in st.session_state:
             st.session_state['config_loaded'] = False
@@ -178,9 +190,6 @@ def main():
         # First button
         if st.button("Load Configurations"):
             with st.spinner("Loading configurations..."):
-                HEAD = {'X-StorageApi-Token': source_api_token}
-                HEAD_FORM = {'X-StorageApi-Token': source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
-
                 if only_selected_configs and len(configuration_ids) > 0:
                     configs = get_keboola_configs(source_project_host, HEAD, skip, keep, configuration_ids)
                 else:
@@ -188,18 +197,39 @@ def main():
 
                 st.write("Configurations to migrate:")
                 # Display the loaded configurations
+
+                # Store shared_code_ids in session state
+                st.session_state.shared_code_ids_snowflake = []
+                st.session_state.shared_code_ids_python = []
+             
                 for config in configs:
                     component_id = config.get("component_id")
                     name = config.get("name")
                     config_id = config.get("id")
         
                     st.write(f"**{component_id}** name **{name}** and ID **{config_id}**")
+ 
+                    if include_shared_code:
+                        # Select shared_code for Python and Snowflake transforamtion
+                        if config.get('component_id') == "keboola.snowflake-transformation":
+                            configuration = config.get('configuration', {})
+                            shared_code_row_ids = configuration.get('shared_code_row_ids', [])
+                            if shared_code_row_ids:
+                                st.session_state.shared_code_ids_snowflake.extend(shared_code_row_ids)
 
+                        elif config.get('component_id') == "keboola.python-transformation-v2":
+                            configuration = config.get('configuration', {})
+                            shared_code_row_ids = configuration.get('shared_code_row_ids', [])
+                            if shared_code_row_ids:
+                                st.session_state.shared_code_ids_python.extend(shared_code_row_ids)
+
+                if include_shared_code:
+                    st.write("Shared code for selected **Python and Snowflake transformations** will also be migrated")
+              
                 st.write("")
                 st.write("Clicking on button **Migrate Configurations** will migrate the following configurations. Click on **Dismiss Configurations** to clear the configuration selection")
                 # Set the state after configurations are loaded
                 st.session_state['config_loaded'] = True
-            
 
         # Second button, which appears only after the configurations are loaded
         if st.session_state['config_loaded']:
@@ -247,13 +277,27 @@ def main():
                     BRANCH_DEST = 'default'
 
                     st.subheader(f"The configuration migration to the {destination_project_name} project is in progress")
+                    
+                    # Retrieve shared_code_ids from session state
+                    shared_code_ids_snowflake = st.session_state.get('shared_code_ids_snowflake', [])
+                    shared_code_ids_python = st.session_state.get('shared_code_ids_python', [])
 
                     try:
                         if only_selected_configs and len(configuration_ids) > 0:
                             configs = get_keboola_configs(source_project_host, HEAD, skip, keep, configuration_ids)
+                            if include_shared_code:
+                                for shared_code in shared_code_configs:
+                                    if shared_code["id"] == "shared-codes.python-transformation-v2":
+                                        shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_python]
+                                    elif shared_code["id"] == "shared-codes.snowflake-transformation":
+                                        shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_snowflake]
+
+                                #st.write(shared_code_configs)
+                                migrate_shared_code = migrate_configs(source_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False)
+
                         else:
                             configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
-
+                        
                         fails = migrate_configs(source_project_host, HEAD, configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False)
                         st.write(f"Migration to {destination_project_name} completed. Failures:", fails)
 
