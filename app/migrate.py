@@ -116,13 +116,10 @@ def main():
             configuration_options = None
             with st.spinner("Fetching configurations..."):
                 if skip:
-                    st.write('Fetching available configurations besides the components you wanted to skip...')
                     configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, component_ids, 'skip')
                 elif keep:
-                    st.write('Fetching available configurations for components you selected...')
                     configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, component_ids, 'keep')
                 else:
-                    st.write('Fetching available configurations for all components...')
                     configuration_options = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, None, 'all')
 
             # Remove orchestrators and schedulers from configurations
@@ -232,28 +229,25 @@ def main():
                 st.session_state['config_loaded'] = True
 
         # Second button, which appears only after the configurations are loaded
+        # Flag to determine whether migration process has started
+        migrate_clicked = False
+
+        # Ensure the configuration is loaded before showing buttons
         if st.session_state['config_loaded']:
-            # Ensure the migrate_clicked state is initialized
-            if 'migrate_clicked' not in st.session_state:
-                st.session_state['migrate_clicked'] = False
-    
             # Display buttons only if migrate_clicked is False
-            if not st.session_state['migrate_clicked']:
+            if not migrate_clicked:
                 col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
                 with col1:
                     migrate_clicked = st.button("Migrate Configurations")
-                
+
                 with col2:
                     if st.button("Dismiss Configurations"):
                         # Reset the session state to its initial state
                         st.session_state.clear()
                         st.experimental_rerun()
 
-                # If "Migrate Configurations" is clicked, update state and rerun
-                if migrate_clicked:
-                    st.session_state['migrate_clicked'] = True
-    
-            if st.session_state['migrate_clicked']:
+            # If "Migrate Configurations" is clicked, update state and rerun
+            if migrate_clicked:
                 total_projects = len(destination_selected_project_details)
                 st.subheader("Migration Progress")
                 percent_complete_text = st.empty()  # Placeholder for dynamic status text
@@ -270,14 +264,14 @@ def main():
                     status_text.text(f"Migrating project {i + 1} of {total_projects}: {destination_project_name}")
 
                     # Execute migrate configurations script for all selected projects
-                    HEAD = {'X-StorageApi-Token':source_api_token}
-                    HEAD_FORM = {'X-StorageApi-Token':source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
-                    HEAD_DEST = {'X-StorageApi-Token':destination_api_token}
-                    HEAD_FORM_DEST = {'X-StorageApi-Token':destination_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
+                    HEAD = {'X-StorageApi-Token': source_api_token}
+                    HEAD_FORM = {'X-StorageApi-Token': source_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
+                    HEAD_DEST = {'X-StorageApi-Token': destination_api_token}
+                    HEAD_FORM_DEST = {'X-StorageApi-Token': destination_api_token, 'Content-Type': 'application/x-www-form-urlencoded'}
                     BRANCH_DEST = 'default'
 
                     st.subheader(f"The configuration migration to the {destination_project_name} project is in progress")
-                    
+
                     # Retrieve shared_code_ids from session state
                     shared_code_ids_snowflake = st.session_state.get('shared_code_ids_snowflake', [])
                     shared_code_ids_python = st.session_state.get('shared_code_ids_python', [])
@@ -292,12 +286,11 @@ def main():
                                     elif shared_code["id"] == "shared-codes.snowflake-transformation":
                                         shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_snowflake]
 
-                                #st.write(shared_code_configs)
                                 migrate_shared_code = migrate_configs(source_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False)
 
                         else:
                             configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
-                        
+
                         fails = migrate_configs(source_project_host, HEAD, configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False)
                         st.write(f"Migration to {destination_project_name} completed. Failures:", fails)
 
@@ -318,7 +311,7 @@ def main():
                 if fails == []:
                     st.balloons()
 
-                st.session_state['migrate_clicked'] = False
+                # Optionally, clear the session state if needed
                 st.session_state['config_loaded'] = False
     else:
         st.markdown("First, select the source project from which you want to transfer the configuration. Then, choose the projects to which you want to migrate it...")

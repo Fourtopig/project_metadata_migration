@@ -5,7 +5,6 @@ import concurrent.futures
 
 
 def get_keboola_configs(BASE, HEAD, skip=None, keep=None, selected_configs=None):
-    st.write('Exporting configurations...')
     configs_src = []
     
     if selected_configs:
