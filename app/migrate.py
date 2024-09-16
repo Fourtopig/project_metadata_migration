@@ -286,12 +286,12 @@ def main():
                                     elif shared_code["id"] == "shared-codes.snowflake-transformation":
                                         shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_snowflake]
 
-                                migrate_shared_code = migrate_configs(source_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False)
+                                migrate_shared_code = migrate_configs(source_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name,  DEBUG=False)
 
                         else:
                             configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
 
-                        fails = migrate_configs(source_project_host, HEAD, configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False)
+                        fails = migrate_configs(source_project_host, HEAD, configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name, DEBUG=False)
                         st.write(f"Migration to {destination_project_name} completed. Failures:", fails)
 
                     except (ConnectionError, Timeout) as conn_err:

@@ -2,6 +2,7 @@ import requests
 import streamlit as st
 import datetime
 import concurrent.futures
+import csv
 
 
 def get_keboola_configs(BASE, HEAD, skip=None, keep=None, selected_configs=None):
@@ -73,8 +74,9 @@ def get_component_configurations(BASE, HEAD, COMPONENT_IDS=None, MODE=None):
                 configs_src.append([component_id, config['name'], config['id']])
     return configs_src
 
-def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False):
+def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, DEBUG=False):
     log_messages = []
+    CSV_PATH = 'log.csv'
     try:
         configurationId = config['id']
         configurationName = config['name']
@@ -114,9 +116,12 @@ def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, D
             config_dest = requests.post(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/{componentId}/configs',
                                         headers=HEAD_DEST,
                                         json=values)
-            response = requests.put(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/{componentId}/configs/{configurationId}',
-                                              headers=HEAD_DEST,
-                                              json=values)
+            if config_dest.status_code != 201:
+                response = requests.put(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/{componentId}/configs/{configurationId}',
+                                                  headers=HEAD_DEST,
+                                                  json=values)
+                if response.status_code != 200:
+                    raise Exception(f'Failed to update config: {response.text}')
 
             if metadataFolderPayload:
                 requests.post(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/keboola.snowflake-transformation/configs/{configurationId}/metadata',
@@ -128,8 +133,14 @@ def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, D
                               headers=HEAD_FORM_DEST,
                               data=metadataFolderPayloadPython)
 
-        current_time = datetime.datetime.now().replace(microsecond=0)
-        log_messages.append(F"**Migrated**: {config['component_id']} **{config['name']}** at {current_time}")
+            current_time = datetime.datetime.now().replace(microsecond=0)
+            log_message = f"**Migrated**: {config['component_id']} **{config['name']}** at {current_time}"
+            log_messages.append(log_message)
+
+        with open(CSV_PATH, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([config['component_id'], source_name, destination_name, config['id'], config['name'], current_time, 'Success', log_message])
+
 
         for row in config['rows']:
                 rowId = row['id']
@@ -157,19 +168,26 @@ def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, D
 
 
     except Exception as e:
-        log_messages.append(f'FAILED: {config["component_id"]} {config["name"]} {str(e)}')
+        current_time = datetime.datetime.now().replace(microsecond=0)
+        log_message = f'FAILED: {config["component_id"]} {config["name"]} {str(e)}'
+        log_messages.append(log_message)
+
+        with open(CSV_PATH, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([config['component_id'], source_name, destination_name, config['id'], config['name'], current_time, 'Failed', log_message])
+
         return (False, log_messages)
     
     return (True, log_messages)
 
-def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG=False):
+def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, DEBUG=False):
     fails = []
     log_messages = []
     
     st.write(f'Proceeding to migrate {len(configs_src)} configurations...')
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = {executor.submit(migrate_config, config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, DEBUG): config for config in configs_src}
+        futures = {executor.submit(migrate_config, config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, DEBUG): config for config in configs_src}
 
         for future in concurrent.futures.as_completed(futures):
             config = futures[future]

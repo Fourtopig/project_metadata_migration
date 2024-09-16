@@ -1,0 +1,57 @@
+﻿ComponentId,SourceProject,DestinationProject,ConfigurationId,ConfigurationName,DateTime,Status,StatusText
+keboola.shared-code,TEST 1,TEST 2,shared-codes.snowflake-transformation,Snowflake Transformation Shared Codes,16/09/2024 15:03,Failed,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,16/09/2024 15:03,Failed,
+keboola.variables,TEST 1,TEST 2,1175721352,Variables definition for keboola.python-transformation-v2/1175719507,16/09/2024 15:03,Failed,
+keboola.python-transformation-v2,TEST 1,TEST 2,1159719669,[Pokus] extract data ORDERS_AND_ITEMS_REPORT,16/09/2024 15:03,Failed,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175719507,[BigTest] Python,16/09/2024 15:03,Failed,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,16/09/2024 15:03,Failed,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,16/09/2024 15:04,Failed,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.snowflake-transformation,Snowflake Transformation Shared Codes,16/09/2024 15:04,Failed,
+keboola.variables,TEST 1,TEST 2,1175721352,Variables definition for keboola.python-transformation-v2/1175719507,16/09/2024 15:04,Failed,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175719507,[BigTest] Python,16/09/2024 15:04,Failed,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,16/09/2024 15:04,Failed,
+keboola.python-transformation-v2,TEST 1,TEST 2,1159719669,[Pokus] extract data ORDERS_AND_ITEMS_REPORT,16/09/2024 15:04,Failed,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,16/09/2024 15:05,Success,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.snowflake-transformation,Snowflake Transformation Shared Codes,16/09/2024 15:05,Success,
+keboola.variables,TEST 1,TEST 2,1175721352,Variables definition for keboola.python-transformation-v2/1175719507,16/09/2024 15:05,Success,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,16/09/2024 15:05,Success,
+keboola.python-transformation-v2,TEST 1,TEST 2,1159719669,[Pokus] extract data ORDERS_AND_ITEMS_REPORT,16/09/2024 15:05,Success,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175719507,[BigTest] Python,16/09/2024 15:05,Success,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,16/09/2024 15:10,Success,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.snowflake-transformation,Snowflake Transformation Shared Codes,16/09/2024 15:10,Success,
+keboola.variables,TEST 1,TEST 2,1175721352,Variables definition for keboola.python-transformation-v2/1175719507,16/09/2024 15:10,Success,
+keboola.python-transformation-v2,TEST 1,TEST 2,1159719669,[Pokus] extract data ORDERS_AND_ITEMS_REPORT,16/09/2024 15:10,Success,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,16/09/2024 15:10,Success,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175719507,[BigTest] Python,16/09/2024 15:10,Success,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,16/09/2024 15:12,Success,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.snowflake-transformation,Snowflake Transformation Shared Codes,16/09/2024 15:12,Success,
+keboola.variables,TEST 1,TEST 2,1176181796,Variables definition for keboola.snowflake-transformation/1176181743,16/09/2024 15:12,Success,
+keboola.snowflake-transformation,TEST 1,TEST 2,1180484206,[DoorDash] test 2,16/09/2024 15:12,Success,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,16/09/2024 15:12,Success,
+keboola.snowflake-transformation,TEST 1,TEST 2,1176181743,[DoorDash] SQL transforamtion,16/09/2024 15:12,Success,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,16/09/2024 15:13,Success,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.snowflake-transformation,Snowflake Transformation Shared Codes,16/09/2024 15:13,Success,
+keboola.variables,TEST 1,TEST 2,1176181796,Variables definition for keboola.snowflake-transformation/1176181743,16/09/2024 15:13,Success,
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,16/09/2024 15:13,Success,
+keboola.snowflake-transformation,TEST 1,TEST 2,1176181743,[DoorDash] SQL transforamtion,16/09/2024 15:13,Success,
+keboola.snowflake-transformation,TEST 1,TEST 2,1180484206,[DoorDash] test 2,16/09/2024 15:13,Success,
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,2024-09-16 15:19:14,Success,**Migrated**: keboola.shared-code **Python Transformation V2 Shared Codes** at 2024-09-16 15:19:14
+keboola.shared-code,TEST 1,TEST 2,shared-codes.snowflake-transformation,Snowflake Transformation Shared Codes,2024-09-16 15:19:14,Success,**Migrated**: keboola.shared-code **Snowflake Transformation Shared Codes** at 2024-09-16 15:19:14
+intecs.ex-tutorial-new-componennt,TEST 1,TEST 2,1176127351,[DoorDash] extract data,2024-09-16 15:19:21,Success,**Migrated**: intecs.ex-tutorial-new-componennt **[DoorDash] extract data** at 2024-09-16 15:19:21
+keboola.variables,TEST 1,TEST 2,1176181796,Variables definition for keboola.snowflake-transformation/1176181743,2024-09-16 15:19:21,Success,**Migrated**: keboola.variables **Variables definition for keboola.snowflake-transformation/1176181743** at 2024-09-16 15:19:21
+keboola.snowflake-transformation,TEST 1,TEST 2,1180484206,[DoorDash] test 2,2024-09-16 15:19:23,Success,**Migrated**: keboola.snowflake-transformation **[DoorDash] test 2** at 2024-09-16 15:19:23
+keboola.snowflake-transformation,TEST 1,TEST 2,1176181743,[DoorDash] SQL transforamtion,2024-09-16 15:19:23,Success,**Migrated**: keboola.snowflake-transformation **[DoorDash] SQL transforamtion** at 2024-09-16 15:19:23
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,2024-09-16 15:19:23,Success,**Migrated**: keboola.python-transformation-v2 **[DoorDash] Test** at 2024-09-16 15:19:23
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,2024-09-16 15:21:28,Failed,"FAILED: keboola.shared-code Python Transformation V2 Shared Codes Failed to update config: {""error"":""Invalid access token"",""exceptionId"":""kbc-us-east-1-connection-cb68b7fb75b0e96c5dc3d7b47815f1da"",""code"":""storage.tokenInvalid""}"
+intecs.ex-tutorial-new-componennt,TEST 1,TEST 2,1176127351,[DoorDash] extract data,2024-09-16 15:21:30,Failed,"FAILED: intecs.ex-tutorial-new-componennt [DoorDash] extract data Failed to update config: {""error"":""Invalid access token"",""exceptionId"":""kbc-us-east-1-connection-2f57bfa8ed724a66f47b65ec68df1e85"",""code"":""storage.tokenInvalid""}"
+keboola.variables,TEST 1,TEST 2,1176181796,Variables definition for keboola.snowflake-transformation/1176181743,2024-09-16 15:21:30,Failed,"FAILED: keboola.variables Variables definition for keboola.snowflake-transformation/1176181743 Failed to update config: {""error"":""Invalid access token"",""exceptionId"":""kbc-us-east-1-connection-5c6342d0ecb314112e4da2622834a3f1"",""code"":""storage.tokenInvalid""}"
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,2024-09-16 15:21:31,Failed,"FAILED: keboola.python-transformation-v2 [DoorDash] Test Failed to update config: {""error"":""Invalid access token"",""exceptionId"":""kbc-us-east-1-connection-9341c99b3d5b342b0965b1d11709a162"",""code"":""storage.tokenInvalid""}"
+keboola.snowflake-transformation,TEST 1,TEST 2,1180484206,[DoorDash] test 2,2024-09-16 15:21:31,Failed,"FAILED: keboola.snowflake-transformation [DoorDash] test 2 Failed to update config: {""error"":""Invalid access token"",""exceptionId"":""kbc-us-east-1-connection-f0c8d213d50bad2cb597f62158dbcfcf"",""code"":""storage.tokenInvalid""}"
+keboola.snowflake-transformation,TEST 1,TEST 2,1176181743,[DoorDash] SQL transforamtion,2024-09-16 15:21:31,Failed,"FAILED: keboola.snowflake-transformation [DoorDash] SQL transforamtion Failed to update config: {""error"":""Invalid access token"",""exceptionId"":""kbc-us-east-1-connection-9aefd2cd2d9a1cad24d47c4dba0f673e"",""code"":""storage.tokenInvalid""}"
+keboola.shared-code,TEST 1,TEST 2,shared-codes.python-transformation-v2,Python Transformation V2 Shared Codes,2024-09-16 15:23:07,Success,**Migrated**: keboola.shared-code **Python Transformation V2 Shared Codes** at 2024-09-16 15:23:07
+keboola.shared-code,TEST 1,TEST 2,shared-codes.snowflake-transformation,Snowflake Transformation Shared Codes,2024-09-16 15:23:07,Success,**Migrated**: keboola.shared-code **Snowflake Transformation Shared Codes** at 2024-09-16 15:23:07
+intecs.ex-tutorial-new-componennt,TEST 1,TEST 2,1176127351,[DoorDash] extract data,2024-09-16 15:23:14,Success,**Migrated**: intecs.ex-tutorial-new-componennt **[DoorDash] extract data** at 2024-09-16 15:23:14
+keboola.variables,TEST 1,TEST 2,1176181796,Variables definition for keboola.snowflake-transformation/1176181743,2024-09-16 15:23:14,Success,**Migrated**: keboola.variables **Variables definition for keboola.snowflake-transformation/1176181743** at 2024-09-16 15:23:14
+keboola.python-transformation-v2,TEST 1,TEST 2,1175807955,[DoorDash] Test,2024-09-16 15:23:16,Success,**Migrated**: keboola.python-transformation-v2 **[DoorDash] Test** at 2024-09-16 15:23:16
+keboola.snowflake-transformation,TEST 1,TEST 2,1180484206,[DoorDash] test 2,2024-09-16 15:23:16,Success,**Migrated**: keboola.snowflake-transformation **[DoorDash] test 2** at 2024-09-16 15:23:16
+keboola.snowflake-transformation,TEST 1,TEST 2,1176181743,[DoorDash] SQL transforamtion,2024-09-16 15:23:16,Success,**Migrated**: keboola.snowflake-transformation **[DoorDash] SQL transforamtion** at 2024-09-16 15:23:16
