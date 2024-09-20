@@ -178,7 +178,12 @@ def main():
             include_shared_code = st.sidebar.checkbox("Include shared codes related to selected transformations (Python and Snowflake)", value=True)
             if include_shared_code:
                 shared_codes = get_component_configurations(source_project_host, {'X-StorageApi-Token':source_api_token}, ["keboola.shared-code"], 'keep')
-                shared_code_configs = get_keboola_configs(source_project_host, HEAD, skip, keep, shared_codes)
+                if shared_codes:
+                    shared_code_configs = get_keboola_configs(source_project_host, HEAD, skip, keep, shared_codes)
+                else:
+                    shared_code_configs = []
+
+            #st.write(shared_code_configs)
 
         # Initialize session state for the first button
         if 'config_loaded' not in st.session_state:
@@ -285,9 +290,8 @@ def main():
                                         shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_python]
                                     elif shared_code["id"] == "shared-codes.snowflake-transformation":
                                         shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_snowflake]
-
-                                migrate_shared_code = migrate_configs(source_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name,  DEBUG=False)
-
+                                if shared_code_configs:
+                                    migrate_shared_code = migrate_configs(source_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name,  DEBUG=False)
                         else:
                             configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
 
