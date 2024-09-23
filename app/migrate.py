@@ -286,10 +286,11 @@ def main():
                             configs = get_keboola_configs(source_project_host, HEAD, skip, keep, configuration_ids)
                             if include_shared_code:
                                 for shared_code in shared_code_configs:
-                                    if shared_code["id"] == "shared-codes.python-transformation-v2":
+                                    if shared_code.get("configuration", {}).get("componentId") == "keboola.python-transformation-v2":
                                         shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_python]
-                                    elif shared_code["id"] == "shared-codes.snowflake-transformation":
+                                    elif shared_code.get("configuration", {}).get("componentId") == "keboola.snowflake-transformation":
                                         shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_snowflake]
+                                #st.write(shared_code_configs)
                                 if shared_code_configs:
                                     migrate_shared_code = migrate_configs(source_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name,  DEBUG=False)
                         else:
