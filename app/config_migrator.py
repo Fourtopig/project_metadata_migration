@@ -74,7 +74,7 @@ def get_component_configurations(BASE, HEAD, COMPONENT_IDS=None, MODE=None):
                 configs_src.append([component_id, config['name'], config['id']])
     return configs_src
 
-def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, DEBUG=False):
+def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, source_project_host, DEBUG=False):
     log_messages = []
     CSV_PATH = 'log.csv'
     try:
@@ -94,7 +94,7 @@ def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, s
 
         metadataFolderPayload = False
         if componentId == 'keboola.snowflake-transformation':
-            snowflake_metadata = requests.get(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/keboola.snowflake-transformation/configs/{configurationId}/metadata',
+            snowflake_metadata = requests.get(f'{source_project_host}v2/storage/branch/{BRANCH_DEST}/components/keboola.snowflake-transformation/configs/{configurationId}/metadata',
                                               headers=HEAD)
             if snowflake_metadata.json():
                 metadataFolderPayload = {
@@ -104,7 +104,7 @@ def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, s
 
         metadataFolderPayloadPython = False
         if componentId == 'keboola.python-transformation-v2':
-            python_metadata = requests.get(f'{BASE}v2/storage/branch/{BRANCH_DEST}/components/keboola.python-transformation-v2/configs/{configurationId}/metadata',
+            python_metadata = requests.get(f'{source_project_host}v2/storage/branch/{BRANCH_DEST}/components/keboola.python-transformation-v2/configs/{configurationId}/metadata',
                                               headers=HEAD)
             if python_metadata.json():
                 metadataFolderPayloadPython = {
@@ -180,14 +180,14 @@ def migrate_config(config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, s
     
     return (True, log_messages)
 
-def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, DEBUG=False):
+def migrate_configs(BASE, HEAD, configs_src, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, source_project_host, DEBUG=False):
     fails = []
     log_messages = []
     
     st.write(f'Proceeding to migrate {len(configs_src)} configurations...')
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = {executor.submit(migrate_config, config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, DEBUG): config for config in configs_src}
+        futures = {executor.submit(migrate_config, config, BASE, HEAD, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_name, destination_name, source_project_host, DEBUG): config for config in configs_src}
 
         for future in concurrent.futures.as_completed(futures):
             config = futures[future]

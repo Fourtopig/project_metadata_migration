@@ -264,6 +264,7 @@ def main():
                 for i, dest_project in enumerate(destination_selected_project_details):
                     destination_api_token = dest_project['token']
                     destination_project_name = dest_project['name']
+                    destination_project_host = dest_project['url']
 
                     # Update status text to show the current project being migrated
                     status_text.text(f"Migrating project {i + 1} of {total_projects}: {destination_project_name}")
@@ -292,11 +293,11 @@ def main():
                                         shared_code["rows"] = [row for row in shared_code["rows"] if row["id"] in shared_code_ids_snowflake]
                                 #st.write(shared_code_configs)
                                 if shared_code_configs:
-                                    migrate_shared_code = migrate_configs(source_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name,  DEBUG=False)
+                                    migrate_shared_code = migrate_configs(destination_project_host, HEAD, shared_code_configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name, source_project_host,  DEBUG=False)
                         else:
                             configs = get_keboola_configs(source_project_host, HEAD, skip, keep)
 
-                        fails = migrate_configs(source_project_host, HEAD, configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name, DEBUG=False)
+                        fails = migrate_configs(destination_project_host, HEAD, configs, HEAD_DEST, HEAD_FORM_DEST, BRANCH_DEST, source_selected_project, destination_project_name, source_project_host, DEBUG=False)
                         st.write(f"Migration to {destination_project_name} completed. Failures:", fails)
 
                     except (ConnectionError, Timeout) as conn_err:

@@ -1,3 +1,4 @@
 venv/
 app/config_destination.json
 app/config_source.json
+app/log.csv
